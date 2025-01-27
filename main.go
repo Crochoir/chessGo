@@ -1,13 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"bytes"
-	"image"
-	"image/color"
+	_ "image/png"
 	"log"
-	"github.com/Crochoir/chessGo/pieces"
-	"github.com/Crochoir/chessGo/board"
+	"os"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -23,20 +19,29 @@ var (
 )
 
 type Game struct {
-	turn bool
+	turn int
 }
 
 func (g *Game) Update() error {
-	if g.turn == true {
-		g.turn == false
+	if g.turn == 1 {
+		g.turn = 2
+	} else if g.turn == 2 {
+		g.turn = 1
 	} else {
-		g.turn == true
+		g.turn = 1
 	}
-}
+	return nil 
+ }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawnOptions{}
-	screen.DrawImage(board, op)
+	opBoard := &ebiten.DrawImageOptions{}
+	screen.DrawImage(board, opBoard)
+
+	opPiece := &ebiten.DrawImageOptions{}
+	opPiece.GeoM.Translate(200, 200)
+	opPiece.GeoM.Scale(0.75, 0.75)
+	screen.DrawImage(piece, opPiece)
+
 }
 
 func (g *Game) Layout(Width, Height int) (int, int) {
@@ -44,11 +49,31 @@ func (g *Game) Layout(Width, Height int) (int, int) {
 }
 
 func main() {
-	img, _, err := image.Decode(bytes.NewReader(rect-8x8_png))
+	boardfile, err := os.Open("board/board.png")
 	if err != nil {
 		log.Fatal(err)
 	}
-	boardImage = ebiten.NewImageFromImage(img)
+	defer boardfile.Close()
+
+
+	img, _, err := ebitenutil.NewImageFromReader(boardfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	board = img
+
+	pieceFile, err := os.Open("pieces/black-rook.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pieceFile.Close()
+
+	imgPiece, _, err := ebitenutil.NewImageFromReader(pieceFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	piece = imgPiece
+
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("chess")
