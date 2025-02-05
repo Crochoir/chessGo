@@ -3,11 +3,10 @@ package main
 import (
 	_ "image/png"
 	"log"
-	"os"
 
 	"github.com/Crochoir/chessGo/board"
+	"github.com/Crochoir/chessGo/pieces"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 const (
@@ -17,7 +16,7 @@ const (
 
 var (
 	gameBoard board.Board
-	piece     *ebiten.Image
+	piece     pieces.Piece
 )
 
 type Game struct {
@@ -40,11 +39,7 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	gameBoard.Draw(screen)
-
-	opPiece := &ebiten.DrawImageOptions{}
-	opPiece.GeoM.Translate(15, 900)
-	opPiece.GeoM.Scale(0.75, 0.75)
-	screen.DrawImage(piece, opPiece)
+	piece.Draw(screen)
 
 }
 
@@ -57,17 +52,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pieceFile, err := os.Open("pieces/black-rook.png")
-	if err != nil {
+	if err := piece.Initialize("pieces/black-rook.png", 10, 0); err != nil {
 		log.Fatal(err)
 	}
-	defer pieceFile.Close()
-
-	imgPiece, _, err := ebitenutil.NewImageFromReader(pieceFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	piece = imgPiece
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("chess")
