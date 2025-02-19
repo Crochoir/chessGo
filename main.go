@@ -16,30 +16,57 @@ const (
 
 var (
 	gameBoard board.Board
-	piece     pieces.Piece
 )
 
 type Game struct {
-	turn int
+	pieces []*pieces.Piece
+}
+
+func NewGame() *Game {
+	return &Game{pieces.CreatePieces()}
 }
 
 func (g *Game) Update() error {
-	if err := gameBoard.Update(); err != nil {
-		return err
-	}
-	if g.turn == 1 {
-		g.turn = 2
-	} else if g.turn == 2 {
-		g.turn = 1
+	mouseX, mouseY := ebiten.CursorPosition()
+
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		for _, piece := range g.pieces {
+			if piece.Contains(mouseX, mouseY) {
+				piece.IsDragging = true
+				piece.DragOffset.X = float64(mouseX) - piece.Position.X
+				piece.DragOffset.Y = float64(mouseY) - piece.Position.Y
+
+			}
+		}
 	} else {
-		g.turn = 1
+		// Release drag when mouse button is released
+		for _, piece := range g.pieces {
+			piece.IsDragging = false
+		}
 	}
+
+	// Move the dragging piece
+	for _, piece := range g.pieces {
+		if piece.IsDragging {
+			piece.Position.X = float64(mouseX) - piece.DragOffset.X
+			piece.Position.Y = float64(mouseY) - piece.DragOffset.Y
+		}
+	}
+	if len(g.pieces) > 0 {
+		g.pieces[0].Move(100, 100)
+	}
+	if len(g.pieces) > 1 {
+		g.pieces[1].Capture()
+	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	gameBoard.Draw(screen)
-	piece.Draw(screen)
+	for _, piece := range g.pieces {
+		piece.Draw(screen)
+	}
 
 }
 
@@ -48,17 +75,13 @@ func (g *Game) Layout(Width, Height int) (int, int) {
 }
 
 func main() {
-	if err := gameBoard.Initialize("board/board.png"); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := piece.Initialize("pieces/black-rook.png", 10, 0); err != nil {
-		log.Fatal(err)
-	}
+	gameBoard.Initialize(screenWidth, screenHeight)
 
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("chess")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+
+	game := NewGame()
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
