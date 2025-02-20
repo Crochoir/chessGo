@@ -1,48 +1,12 @@
 package board
 
 import (
-<<<<<<< HEAD
-	_ "image/png"
-	"log"
-	"os"
-=======
 	"image/color"
->>>>>>> c7fa942b5252e2d25417aa39e682288a11c76269
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type coords struct {
-<<<<<<< HEAD
-	x string
-	y string
-}
-
-type Board struct {
-	image  *ebiten.Image
-	layout *coords
-}
-
-func (b *Board) Initialize(imagePath string) error {
-	boardfile, err := os.Open(imagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer boardfile.Close()
-
-	img, _, err := ebitenutil.NewImageFromReader(boardfile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	b.image = img
-	b.layout = &coords{x: "0", y: "0"}
-	return nil
-}
-
-func (b *Board) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	screen.DrawImage(b.image, op)
-=======
 	X string
 	Y string
 }
@@ -86,7 +50,6 @@ func (b *Board) Draw(screen *ebiten.Image) {
 			screen.DrawImage(squareImage, op)
 		}
 	}
->>>>>>> c7fa942b5252e2d25417aa39e682288a11c76269
 }
 
 func (b *Board) Update() error {
